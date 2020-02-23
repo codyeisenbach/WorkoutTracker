@@ -1,19 +1,27 @@
 {
-  "name": "mongoose_skeleton",
+  "name": "WorkoutTracker",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Homework #17 -- Mongo DB, Mongoose, Express",
+  "main": "WorkoutModel.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "watch": "nodemon server.js",
     "seed": "node seeders/seed.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codyeisenbach/WorkoutTracker"
+  },
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codyeisenbach/WorkoutTracker/issues"
+  },
+  "homepage": "https://github.com/codyeisenbach/WorkoutTracker#readme",
   "dependencies": {
-    "express": "^4.16.3",
-    "mongoose": "^5.3.16",
+    "express": "^4.17.1",
+    "mongoose": "^5.8.10",
     "morgan": "^1.9.1"
   }
 }

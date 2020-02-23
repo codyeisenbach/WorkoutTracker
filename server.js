@@ -1,49 +1,92 @@
 const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
-const path = require("path");
+var path = require('path');
 
 const PORT = process.env.PORT || 3000;
 
 const db = require("./models");
-
 const app = express();
 
 app.use(logger("dev"));
-app.use(express.static("public"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use(express.static("public"));
+
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/workout", { useNewUrlParser: true });
 
 
-// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/workout_trackerdb',
-//  { useNewUrlParser: true, useUnifiedTopology: true }).catch(error => handleError(error));
+app.listen(PORT, () => {
+  console.log(`App running on port ${PORT}!`);
+});
 
-//or
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/workout_trackerdb',
- { useNewUrlParser: true, useUnifiedTopology: true });
- mongoose.connection
-  .once('open', () => console.log('connected'))
-  .on('error', (error) => {
-      console.warn('Error', error);
-  });
+//html routes
 
-db.Workouts.create({name: "JCE Workout Tracker"})
-  .then(dbWorkouts => {
-    console.log('log from inside dbWorkouts.create '+dbWorkouts);
+app.get('/', function (req, res, next) {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+
+
+app.get('/exercise', function (req, res, next) {
+  res.sendFile(path.join(__dirname, "./public/exercise.html"));
+}); 
+
+
+app.get('/stats', function (req, res, next) {
+  res.sendFile(path.join(__dirname, "./public/stats.html"));
+});
+
+// api routes
+
+app.get("/api/workouts", (req, res) => {
+  db.WorkoutModel.find({  })
+    .then(dbFitness => {
+      res.json(dbFitness);
+    })
+    .catch(err => {
+      res.json(err);
+    });
+});
+
+
+app.put("/api/workouts/:id", (req, res) => {
+  console.log("body of the PUT to 'api/workouts'", req.body);
+  console.log("Parameter of the PUT to 'api/workouts'", req.params.id);
+  db.WorkoutModel.update({ _id:req.params.id },{ $push: { exercises: req.body }})
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      res.json(err);
+    });
   })
-  .catch( ({message}) => {
-    console.log('this is the error:' +message);
-  });
 
-  app.get("/", (req,res) =>{
-    console.log('GET root route');
-    res.sendFile(path.join(__dirname, "./public/index.html"));
+
+app.post("/api/workouts", ({body}, res) => {
+  console.log("body of request to api/workouts", body);
+  db.WorkoutModel.create(body)
+    .then(data => {
+      res.json(data);
+    })
+    .catch(err => {
+      res.json(err);
+    });
   })
-  app.use(require("./controllers/exercises"));
-  app.use(require("./controllers/workout"));
-  
-  app.listen(PORT, () => {
-    console.log(`App running on port ${PORT}!`);
-  });
+
+
+app.get("/api/workouts/range", (req, res) => {
+
+  db.WorkoutModel.find({})
+
+    .then(dbFitness => {
+
+      let range = dbFitness.slice(dbFitness.length-7);
+      res.json(range);
+
+    })
+    .catch(err => {
+      res.json(err);
+    });
+});
